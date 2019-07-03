@@ -17,7 +17,7 @@ function parse_heroku_env()
 
     $url = parse_url($databaseUrl);
 
-    $connection = $url['schema'] == 'postgres' ? "pgsql" : $url['schema'];
+    $connection = $url['scheme'] == 'postgres' ? "pgsql" : $url['scheme'];
     putenv("DB_CONNECTION=" . $connection);
     putenv("DB_HOST=" . $url['host']);
     putenv("DB_PORT=" . $url['port']);
