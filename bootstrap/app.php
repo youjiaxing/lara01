@@ -11,6 +11,8 @@
 |
 */
 
+parse_heroku_env();
+
 $app = new Illuminate\Foundation\Application(
     realpath(__DIR__.'/../')
 );

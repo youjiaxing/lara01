@@ -16,3 +16,7 @@ Route::get("/about", "StaticPagesController@about")->name('about');
 Route::get("/help", "StaticPagesController@help")->name("help");
 
 Route::get("/signup", "UsersController@showRegistrationForm")->name("signup");
+
+Route::get("/test/db", function () {
+    dd(DB::table("users")->count());
+});
