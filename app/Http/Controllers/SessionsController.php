@@ -6,6 +6,12 @@ use Illuminate\Http\Request;
 
 class SessionsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('guest', ['only' => ['create', 'store']]);
+        $this->middleware('auth', ['only' => 'destroy']);
+    }
+
     public function create()
     {
         return view("users.login");
@@ -19,7 +25,7 @@ class SessionsController extends Controller
         ]);
 
         if (\Auth::attempt($credentials, $request->has("remember"))) {
-            return redirect()->route("home")->with("info", "欢迎回来");
+            return redirect()->intended(route("home"))->with("info", "欢迎回来");
         } else {
             return redirect()->back()->with("danger", "账号或密码错误");
         }
