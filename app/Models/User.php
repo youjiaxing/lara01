@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -24,8 +25,18 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'activation_token'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (User $user) {
+            $user->activation_token = Str::random(30);
+        });
+    }
+
 
     public function gravatar($size = '100')
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class SessionsController extends Controller
@@ -25,6 +26,12 @@ class SessionsController extends Controller
         ]);
 
         if (\Auth::attempt($credentials, $request->has("remember"))) {
+            if (!\Auth::user()->is_active) {
+
+                \Auth::logout();
+                return redirect()->route("home")->with("warning", "账号未激活");
+            }
+
             return redirect()->intended(route("home"))->with("info", "欢迎回来");
         } else {
             return redirect()->back()->with("danger", "账号或密码错误");

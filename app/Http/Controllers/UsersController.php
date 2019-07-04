@@ -6,13 +6,15 @@ use App\Http\Requests\SignupRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UsersController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['create', 'store', 'show', 'index']]);
-        $this->middleware('guest', ['only' => ['create', 'store']]);
+        $this->middleware('auth', ['except' => ['create', 'store', 'show', 'index', 'confirmEmail']]);
+        $this->middleware('guest', ['only' => ['create', 'store', 'confirmEmail']]);
     }
 
     public function create()
@@ -27,11 +29,27 @@ class UsersController extends Controller
 
     public function store(SignupRequest $request)
     {
-        $user = User::create($request->only(['name', 'email', 'password']));
+        $user = new User($request->only(['name', 'email']));
+        $user->password = bcrypt($request->input('password'));
+        $user->save();
 
-        \Auth::login($user);
+//        \Auth::login($user);
+
         session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
-        return redirect()->route("users.show", [$user->id]);
+        return redirect()->route("home", [$user->id])->with("success", "验证邮件已发送到你的注册邮箱上，请注意查收。");
+    }
+
+    public function confirmEmail(User $user, string $token)
+    {
+        if (!empty($user->activation_token) && $user->activation_token !== $token) {
+            throw new NotFoundHttpException("激活出错");
+        }
+
+        $user->is_active = true;
+        $user->activation_token = null;
+        $user->save();
+        \Auth::login($user);
+        return redirect()->route('home')->with("success", "激活成功");
     }
 
     public function index()
