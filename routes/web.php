@@ -16,6 +16,12 @@ Route::get("/about", "StaticPagesController@about")->name('about');
 Route::get("/help", "StaticPagesController@help")->name("help");
 
 Route::get("/signup", "UsersController@create")->name("signup");
+Route::get('/users/{user}/followings', 'UsersController@followings')->name('users.followings');
+Route::get('/users/{user}/followers', 'UsersController@followers')->name('users.followers');
+
+Route::post("/users/follow/{user}", "FollowersController@store")->name("followers.store");
+Route::delete("/users/unfollow/{user}", "FollowersController@destroy")->name("followers.destroy");
+
 Route::get("/users/{user}/{token}", "UsersController@confirmEmail")->name("confirm_email");
 Route::resource("users", "UsersController")->names("users");
 
@@ -29,6 +35,8 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
 
 Route::resource("statuses", "StatusesController")->only("store", "destroy");
+
+
 
 
 

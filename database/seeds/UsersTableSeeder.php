@@ -11,7 +11,11 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(\App\Models\User::class)->times(110)->create()->each(function (\App\Models\User $user) {
+        $needStatus = 5;
+        factory(\App\Models\User::class)->times(150)->create()->each(function (\App\Models\User $user) use (&$needStatus) {
+            if ($needStatus-- <= 0) {
+                return;
+            }
             $user->statuses()->saveMany(factory(\App\Models\Status::class)->times(rand(15, 35))->make());
         });
 

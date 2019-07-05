@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\ResetPassword;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Str;
@@ -68,7 +69,6 @@ class User extends Authenticatable
         });
     }
 
-
     public function gravatar($size = '100')
     {
         $hash = md5(strtolower(trim($this->getAttribute('email'))));
@@ -85,8 +85,43 @@ class User extends Authenticatable
         return $this->hasMany(Status::class, 'user_id', 'id');
     }
 
+    /**
+     * @return Status|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     */
     public function feed()
     {
-        return $this->statuses()->orderBy("created_at", "desc");
+        // 关注的人 以及 自己的所有微博
+        $userIds = $this->followings()->pluck("followers.user_id")->toArray();
+//        $userIds = $this->followings->pluck("id")->toArray();
+        $userIds[] = $this->id;
+
+        return Status::whereIn("user_id", $userIds)->with("user")->orderBy("created_at", "desc");
+//        return $this->statuses()->orderBy("created_at", "desc");
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, "followers", "user_id", "follower_id")->withTimestamps();
+    }
+
+    public function followings()
+    {
+        return $this->belongsToMany(User::class, "followers", "follower_id", "user_id")->withTimestamps();
+    }
+
+    public function follow($userIds)
+    {
+        $this->followings()->sync(is_array($userIds) ? $userIds : func_get_args(), false);
+    }
+
+    public function unfollow($userIds)
+    {
+        $this->followings()->detach(is_array($userIds) ? $userIds : func_get_args());
+    }
+
+    public function isFollowing($userId)
+    {
+        return $this->followings->contains($userId);
+//        return $this->followings()->allRelatedIds()->contains($userId);
     }
 }

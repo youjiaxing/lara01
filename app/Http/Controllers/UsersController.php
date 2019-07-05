@@ -24,7 +24,7 @@ class UsersController extends Controller
 
     public function show(User $user)
     {
-        $statuses = $user->statuses()->paginate();
+        $statuses = $user->statuses()->orderBy("created_at", "desc")->paginate();
         return view("users.show", compact('user', 'statuses'));
     }
 
@@ -81,5 +81,19 @@ class UsersController extends Controller
         $this->authorize("destroy", $user);
         $user->delete();
         return back()->with("info", "删除成功");
+    }
+
+    public function followings(User $user)
+    {
+        $users = $user->followings()->paginate();
+        $title = '关注的人';
+        return view('users.show_follow', compact('users', 'title'));
+    }
+
+    public function followers(User $user)
+    {
+        $users = $user->followers()->paginate();
+        $title = '粉丝';
+        return view('users.show_follow', compact('users', 'title'));
     }
 }
