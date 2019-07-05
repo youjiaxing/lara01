@@ -8,7 +8,12 @@ class StaticPagesController extends Controller
 {
     public function home()
     {
-        return view('static_pages.' . explode('::', __METHOD__)[1]);
+        $feed_items  = [];
+        if (\Auth::check()) {
+            $feed_items  = \Auth::user()->feed()->with('user')->paginate(30);
+        }
+
+        return view('static_pages.' . explode('::', __METHOD__)[1], compact('feed_items'));
     }
 
     public function about()

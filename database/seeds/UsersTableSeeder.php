@@ -11,7 +11,9 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(\App\Models\User::class)->times(110)->create();
+        factory(\App\Models\User::class)->times(110)->create()->each(function (\App\Models\User $user) {
+            $user->statuses()->saveMany(factory(\App\Models\Status::class)->times(rand(15, 35))->make());
+        });
 
         $user = \App\Models\User::find(1);
         $user->name = 'yjx';
